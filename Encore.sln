@@ -7,7 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Encore", "Encore\Encore.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Encore.SampleWebApi", "Encore.SampleWebApi\Encore.SampleWebApi.csproj", "{899AFAEA-AB5D-48EE-BF38-1216BC2A99F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encore.Testing", "Encore.Testing\Encore.Testing.csproj", "{418EAF1D-F558-47DF-A09D-A00FDE2774B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Encore.Testing", "Encore.Testing\Encore.Testing.csproj", "{418EAF1D-F558-47DF-A09D-A00FDE2774B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C56D7959-2E7F-4F2B-BE6B-120530AA6103}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
