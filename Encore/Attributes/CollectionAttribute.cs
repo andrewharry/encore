@@ -3,8 +3,10 @@
 namespace Encore
 {
     /// <summary>
-    /// Register as a Collection of types
+    /// Register as a 'Collection' of types with 'Transient' Lifetime.
+    /// Collections allow more than one concrete implementation to be registered
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
     public class CollectionAttribute : RegisterAttribute
     {
         public CollectionAttribute()

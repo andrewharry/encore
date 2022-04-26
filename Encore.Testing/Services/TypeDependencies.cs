@@ -2,25 +2,40 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Encore.Helpers;
+using TypeDictionary = System.Collections.Generic.Dictionary<System.Type, System.Type[]>;
 
 namespace Encore.Testing.Services
 {
     /// <summary>
-    /// Responsible for Inspecting a Type and determining which Types it is dependent on
+    /// Responsible for Inspecting a Type and determining which Types it depends on
     /// </summary>
     public class TypeDependencies
     {
+        public static Type[] IgnoreInterfaces { get; set; } = { typeof(ILogger), typeof(ILogger<>) };
+        public static int CacheSize { get; set; } = 20000;
+
+        private static TypeDictionary classCache = new TypeDictionary(CacheSize);
+        private static TypeDictionary interfaceCache = new TypeDictionary(CacheSize);
+
         private static readonly Type genericArray = typeof(IEnumerable<>);
-        private static Type[] ignoreInterfaces = new[] { typeof(ILogger), typeof(ILogger<>) };
-        public static Dictionary<Type, Type[]> ClassDependencyCache = new Dictionary<Type, Type[]>(20000);
-        public static Dictionary<Type, Type[]> InterfaceDependencyCache = new Dictionary<Type, Type[]>(20000);
+        private static Type[] empty = Array.Empty<Type>();
 
         public static Type[] GetDependencies(Type type, bool includeDependenciesByAttribute = true)
         {
-            if (type == null)
-                return Array.Empty<Type>();
+            return GetTypesInternal(type, classCache, interfacesOnly: false, includeDependenciesByAttribute);
+        }
 
-#if DEBUG
+        public static Type[] GetInterfaces(Type type)
+        {
+            return GetTypesInternal(type, interfaceCache, interfacesOnly: true, includeDependenciesByAttribute: false);
+        }
+
+        private static Type[] GetTypesInternal(Type type, TypeDictionary cache, bool interfacesOnly, bool includeDependenciesByAttribute)
+        {
+            if (type == null)
+                return empty;
+
+            #if DEBUG
             var stack = new StackTrace().GetFrames();
 
             if (stack.Length > 60)
@@ -28,39 +43,56 @@ namespace Encore.Testing.Services
                 Console.WriteLine("Potential Infinite Loop - Stackoverflow imminent");
                 Debugger.Break();
             }
-#endif
+            #endif
 
-            if (ClassDependencyCache?.ContainsKey(type) == true)
-                return ClassDependencyCache[type];
+            if (cache?.ContainsKey(type) == true)
+                return cache[type];
 
             var constructor = GetConstructor(type);
-            var parameters = (constructor?.GetParameters() ?? Array.Empty<ParameterInfo>()).Select(v => v.ParameterType).ToSafeArray();
+
+            if (constructor == null)
+                return empty;
+
+            var parameters = constructor.GetParameters().ToSafeArray(v => v.ParameterType);
             var types = new List<Type>(parameters.Length);
 
             types.AddRange(parameters.Where(v => !v.IsGenericType));
             types.AddRange(parameters.Where(v => v.IsGenericType && v.GetGenericTypeDefinition() == genericArray).Select(v => v.GetGenericArguments()[0]));
+
+            var interfaces = types.Where(v => v.IsInterface)
+                .Except(IgnoreInterfaces)
+                .ToSafeArray();
+
+            if (interfacesOnly)
+            {
+                cache?.Add(type, interfaces);
+                return interfaces;
+            }
+
             if (includeDependenciesByAttribute)
                 types.AddRange(GetDependenciesByAttribute(type));
 
-            var interfaces = types.Where(v => v.IsInterface)
-                .Except(ignoreInterfaces)
+            interfaces = interfaces
                 .SelectMany(v => AssemblyHelper.GetMatchingTypes(Assembly.GetEntryAssembly() ?? Assembly.GetCallingAssembly(), v))
                 .ToSafeArray();
 
             var classes = types.Where(v => v.IsClass && !v.IsInterface);
             var values = interfaces.Union(classes).Distinct().ToSafeArray();
 
-            ClassDependencyCache?.Add(type, values);
+            cache?.Add(type, values);
             return values;
         }
 
+        /// <summary>
+        /// Responsible for selecting the best constructor for the given 'type'
+        /// </summary>
         public static ConstructorInfo? GetConstructor(Type type)
         {
-            foreach (var constructor in type.GetConstructors())
-            {
-                var doNotSelect = constructor.GetCustomAttribute<DoNotSelectAttribute>();
+            var constructors = type.GetConstructors().Safe().OrderByDescending(v => v.GetParameters()?.Length ?? 0).ToSafeArray();
 
-                if (doNotSelect != null)
+            foreach (var constructor in constructors)
+            {
+                if (constructor.GetCustomAttribute<DoNotSelectAttribute>() != null)
                     continue;
 
                 return constructor;
@@ -72,24 +104,7 @@ namespace Encore.Testing.Services
         public static Type[] GetDependenciesByAttribute(Type type)
         {
             var attribute = type.GetCustomAttributes<RegisterAttribute>().FirstOrDefault();
-            return attribute?.GetDependencies() ?? Array.Empty<Type>();
-        }
-
-        public static Type[] GetInterfaces(Type type)
-        {
-            if (InterfaceDependencyCache?.ContainsKey(type) == true)
-                return InterfaceDependencyCache[type];
-
-            var constructor = type.GetConstructors().FirstOrDefault();
-            var parameters = (constructor?.GetParameters() ?? Array.Empty<ParameterInfo>()).Select(v => v.ParameterType).ToSafeArray();
-            var types = new List<Type>(parameters.Length);
-
-            types.AddRange(parameters.Where(v => !v.IsGenericType));
-            types.AddRange(parameters.Where(v => v.IsGenericType && v.GetGenericTypeDefinition() == genericArray).Select(v => v.GetGenericArguments()[0]));
-
-            var interfaces = types.ToSafeArray(v => v.IsInterface);
-            InterfaceDependencyCache?.Add(type, interfaces);
-            return interfaces;
+            return attribute?.GetDependencies() ?? empty;
         }
     }
 }

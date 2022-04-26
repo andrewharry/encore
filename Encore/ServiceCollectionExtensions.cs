@@ -12,7 +12,7 @@ namespace Encore
     {
         public static void RegisterByAttributes(this IServiceCollection collection, Assembly application)
         {
-            var types = AssemblyHelper.GetCustomAttributeClasses<RegisterAttribute>(application);
+            var types = AssemblyHelper.SearchByRegisterAttribute<RegisterAttribute>(application);
 
             if (types.IsNullOrEmpty())
                 return;
@@ -22,7 +22,7 @@ namespace Encore
 
         public static void RegisterByAttributes(this IServiceCollection collection, Type[] types)
         {
-            var items = AssemblyHelper.GetCustomAttributeClasses<RegisterAttribute>(types);
+            var items = AssemblyHelper.SearchByRegisterAttribute<RegisterAttribute>(types);
 
             if (items.IsNullOrEmpty())
                 return;

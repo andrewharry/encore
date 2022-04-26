@@ -5,7 +5,8 @@ namespace Encore.Helpers
 {
     public class AssemblyHelper
     {
-        private static readonly OneTime Once = new();
+        private static IEnumerable<Assembly> LoadedAssemblies => AssemblyLoadContext.Default.Assemblies;
+        private static readonly OneTime OnceOnly = new();
 
         public static Type[] GetMatchingTypes(Assembly current, Type type)
         {
@@ -32,13 +33,13 @@ namespace Encore.Helpers
             return matches.ToSafeArray();
         }
 
-        public static List<(Type, T)> GetCustomAttributeClasses<T>(Assembly current)
+        public static List<(Type, T)> SearchByRegisterAttribute<T>(Assembly current)
         {
             var types = GetTypes(current, current.GetPrefix());
-            return GetCustomAttributeClasses<T>(types);
+            return SearchByRegisterAttribute<T>(types);
         }
 
-        public static List<(Type, T)> GetCustomAttributeClasses<T>(IEnumerable<Type> types)
+        public static List<(Type, T)> SearchByRegisterAttribute<T>(IEnumerable<Type> types)
         {
             return (from type in types
                     where !type.IsInterface
@@ -54,9 +55,13 @@ namespace Encore.Helpers
             return Assemblies.IsNullOrEmpty() ? Type.EmptyTypes : Assemblies.SelectMany(v => v.Value.GetTypes());
         }
 
+        /// <summary>
+        /// Eagerly Loads all of the Assemblies in the bin folder where the Assembly filename starts with the given Prefix.
+        /// i.e. All encore.*.dll where the prefix is 'encore'
+        /// </summary>
         public static IEnumerable<Assembly> GetAssemblies(Assembly current, string prefix)
         {
-            Once.Guard(() => LoadAssemblies(current, prefix));
+            OnceOnly.Guard(() => LoadAssemblies(current, prefix));
             return Assemblies.Values;
         }
 
@@ -123,7 +128,5 @@ namespace Encore.Helpers
 
             return AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
         }
-
-        private static IEnumerable<Assembly> LoadedAssemblies => AssemblyLoadContext.Default.Assemblies;
     }
 }

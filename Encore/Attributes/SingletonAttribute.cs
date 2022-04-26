@@ -3,8 +3,10 @@
 namespace Encore
 {
     /// <summary>
-    /// Register as a Singleton Class with the DI Container
+    /// Register the class as a 'Singleton' service with the DI Container.
+    /// There can only be one concrete implementation registered
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
     public class SingletonAttribute : RegisterAttribute
     {
         public SingletonAttribute()

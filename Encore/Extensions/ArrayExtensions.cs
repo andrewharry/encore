@@ -11,7 +11,7 @@ namespace Encore
             return items == null || items.Length == 0;
         }
 
-        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> items)
+        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T>? items)
         {
             return items == null || !items.Any();
         }
@@ -32,7 +32,7 @@ namespace Encore
         /// If the Array is Null it will return an Empty Array instead
         /// </summary>
         [return: NotNull]
-        public static IEnumerable<T> Safe<T>([AllowNull] this IEnumerable<T> items)
+        public static IEnumerable<T> Safe<T>([AllowNull] this IEnumerable<T>? items)
         {
             return items ?? Array.Empty<T>();
         }
@@ -41,7 +41,7 @@ namespace Encore
         /// If the Array is Null it will return an Empty Array instead
         /// </summary>
         [return: NotNull]
-        public static T[] ToSafeArray<T>([AllowNull] this IEnumerable<T> items, Func<T, bool> where)
+        public static T[] ToSafeArray<T>([AllowNull] this IEnumerable<T>? items, Func<T, bool> where)
         {
             return items.Safe().Where(where).ToArray();
         }
@@ -59,7 +59,7 @@ namespace Encore
         /// If the Array is Null it will return an Empty Array instead
         /// </summary>
         [return: NotNull]
-        public static T[] ToSafeArray<T>([AllowNull] this IEnumerable<T> items)
+        public static T[] ToSafeArray<T>([AllowNull] this IEnumerable<T>? items)
         {
             return items.Safe().ToArray();
         }

@@ -33,7 +33,7 @@ namespace Encore.Testing.Services
 
         public void Dispose()
         {
-
+            /* Does Nothing */
         }
     }
 }

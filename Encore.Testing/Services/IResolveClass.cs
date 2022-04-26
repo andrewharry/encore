@@ -5,4 +5,3 @@
         T Resolve<T>() where T : class;
     }
 }
-S

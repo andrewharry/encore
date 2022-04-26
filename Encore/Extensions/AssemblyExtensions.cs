@@ -16,20 +16,5 @@ namespace Encore
         {
             return assembly.GetName().Name ?? string.Empty;
         }
-
-        [return: NotNull]
-        public static string GetVersion(this Assembly assembly)
-        {
-            return assembly.GetName().Version?.ToString() ?? string.Empty;
-        }
-
-        [return: NotNull]
-        public static string GetNameAndVersion(this Assembly assembly)
-        {
-            var assemblyName = assembly.GetName();
-            var name = assemblyName.Name;
-            var version = assemblyName.Version?.ToString() ?? string.Empty;
-            return $"{name}: {version}";
-        }
     }
 }

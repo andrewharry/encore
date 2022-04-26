@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Encore.Testing
 {
-    public abstract class TestingBase : IRegisterClass, IResolveClass
+    public abstract class TestFoundation : IRegisterClass, IResolveClass
     {
         protected bool ValidateOnBuild { get; set; } = false;
         protected bool ValidateScopes { get; set; } = false;
@@ -45,7 +45,6 @@ namespace Encore.Testing
         {
             Resolver?.Dispose();
             serviceProvider?.Dispose();
-            serviceProvider = null;
         }
     }
 }

@@ -15,28 +15,28 @@ namespace Encore.Scope
             this.logger = logger;
         }
 
-        public TService GetRequiredService<TService>() where TService : IScopedService
+        public TInterface GetRequiredService<TInterface>() where TInterface : IScopedService
         {
             var scope = scopeFactory.CreateScope();
-            var service = scope.ServiceProvider.GetRequiredService<TService>();
+            var service = scope.ServiceProvider.GetRequiredService<TInterface>();
             service.Scope = scope;
             return service;
         }
 
-        public TService GetRequiredService<TService>(Type type) where TService : class, IScopedService
+        public TInterface GetRequiredService<TInterface>(Type type) where TInterface : class, IScopedService
         {
-            var interfaceType = typeof(TService);
+            var @interface = typeof(TInterface);
 
-            if (!type.Implements(interfaceType))
+            if (!type.Implements(@interface))
             {
-                var msg = $"The class {type.Name} doesn't implement the interface:{interfaceType.Name}";
+                var msg = $"The class {type.Name} doesn't implement the interface:{@interface.Name}";
                 logger.LogWarning(msg);
                 throw new NotSupportedException(msg);
             }
 
             var scope = scopeFactory.CreateScope();
 
-            if (scope.ServiceProvider.GetRequiredService(type) is TService service)
+            if (scope.ServiceProvider.GetRequiredService(type) is TInterface service)
             {
                 service.Scope = scope;
                 return service;

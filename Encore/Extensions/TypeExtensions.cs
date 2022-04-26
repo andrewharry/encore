@@ -1,9 +1,14 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Encore
 {
     public static class TypeExtensions
     {
+        /// <summary>
+        /// Returns all of the Interfaces implemented by the type.
+        /// </summary>
+        /// <param name="includeInherited">Option to exclude the Base Type interfaces</param>
+        [return: NotNull]
         public static IEnumerable<Type> GetInterfaces(this Type type, bool includeInherited)
         {
             if (includeInherited || type.BaseType == null)
@@ -11,6 +16,9 @@ namespace Encore
             return type.GetInterfaces().Except(type.BaseType.GetInterfaces());
         }
 
+        /// <summary>
+        /// Checks to see if the 'type' class implements the 'target' class
+        /// </summary>
         public static bool Implements(this Type type, Type target)
         {
             if (type == null || target == null) return false;
