@@ -1,4 +1,5 @@
-﻿using Encore.Testing.Services;
+﻿using Encore.EFCoreTesting.Services;
+using Encore.Testing.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,17 +12,12 @@ namespace Encore.EFCoreTesting
     internal class RepositoryHelper
     {
         private readonly IServiceResolver dependencyResolver;
-        private readonly IPrimaryIdResolver primaryIdResolver;
+        private readonly DbContextResolver dbContextResolver;
 
-        public RepositoryHelper(IServiceResolver dependencyResolver, IPrimaryIdResolver primaryIdResolver)
+        public RepositoryHelper(IServiceResolver dependencyResolver, DbContextResolver dbContextResolver)
         {
             this.dependencyResolver = dependencyResolver;
-            this.primaryIdResolver = primaryIdResolver;
-        }
-
-        public TEntity? GetContextItem<TEntity>(Func<TEntity, bool> where) where TEntity : class
-        {
-            return GetItems(where).FirstOrDefault();
+            this.dbContextResolver = dbContextResolver;
         }
 
         public IEnumerable<TEntity> GetItems<TEntity>(Func<TEntity, bool> where) where TEntity : class
@@ -30,6 +26,15 @@ namespace Encore.EFCoreTesting
             {
                 var set = context.Set<TEntity>();
                 return set.Where(where);
+            }
+        }
+
+        public TEntity? FirstOrDefault<TEntity>(Func<TEntity, bool> where) where TEntity : class
+        {
+            using (var context = GetContext<TEntity>())
+            {
+                var set = context.Set<TEntity>();
+                return set.Where(where).FirstOrDefault();
             }
         }
 
@@ -94,16 +99,6 @@ namespace Encore.EFCoreTesting
 
         private void Upsert<TEntity>(DbContext context, TEntity entity) where TEntity : class
         {
-            var set = context.Set<TEntity>();
-            var primaryId = primaryIdResolver.Resolve(entity);
-            var exists = set.Find(primaryId);
-
-            if (exists == null)
-            {
-                set.Add(entity);
-                return;
-            }
-
             var entry = context.Entry(entity);
 
             if (entry.State == EntityState.Detached)

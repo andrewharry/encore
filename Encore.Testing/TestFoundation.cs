@@ -40,6 +40,10 @@ namespace Encore.Testing
         {
             return Resolver.Resolve<T>();
         }
+        public T? TryResolve<T>() where T : class
+        {
+            return Resolver.TryResolve<T>();
+        }
 
         public void Dispose()
         {

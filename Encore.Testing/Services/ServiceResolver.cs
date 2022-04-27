@@ -16,6 +16,16 @@ namespace Encore.Testing.Services
             return container.GetRequiredService<T>();
         }
 
+        public T? TryResolve<T>() where T : class
+        {
+            return container.GetService<T>();
+        }
+
+        public object? TryResolve(Type type)
+        {
+            return container.GetService(type);
+        }
+
         public object Resolve(Type type)
         {
             return container.GetRequiredService(type);
