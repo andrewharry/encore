@@ -10,32 +10,28 @@ namespace Encore.EFCoreTesting
     public abstract class TestWithEFCore : TestWithLogs
     {
         [NotNull]
-        protected DbContextResolver? dbContextResolver;
-
-        [NotNull]
-        private RepositoryHelper? repositoryHelper { get; set; }
+        private DataAccessHelper? dataAccess { get; set; }
 
         /// <summary>
         /// Creates a InMemory Test DbContext.  Needs to be called prior to SetupResolver
         /// </summary>
-        protected virtual void CreateDatabase<T>() where T : DbContext
+        protected virtual void CreateDatabase<TDbContext>() where TDbContext : DbContext
         {
-            if (dbContextResolver == null)
-                dbContextResolver = new DbContextResolver(Resolver);
-
-            var type = typeof(T);
+            var type = typeof(TDbContext);
             var databaseName = type.Name;
-            dbContextResolver.Add(type);
+            dataAccess.CreateDatabase<TDbContext>();
 
             Registry.Register(type, ServiceLifetime.Transient);
-            Registry.ServiceCollection.AddDbContextFactory<T>(option => SetOptions(databaseName, option), ServiceLifetime.Singleton);
-            Registry.ServiceCollection.AddDbContext<T>(option => SetOptions(databaseName, option), ServiceLifetime.Transient);
+            Registry.ServiceCollection.AddDbContextFactory<TDbContext>(option => SetOptions(databaseName, option), ServiceLifetime.Singleton);
+            Registry.ServiceCollection.AddDbContext<TDbContext>(option => SetOptions(databaseName, option), ServiceLifetime.Transient);
         }
 
         protected override void SetupResolver()
         {
-            base.SetupResolver();
-            repositoryHelper = new RepositoryHelper(Resolver, dbContextResolver);
+            if (dataAccess == null) { 
+                base.SetupResolver();
+                dataAccess = new DataAccessHelper(Resolver);
+            }
         }
 
         protected virtual void SetOptions(string databaseName, DbContextOptionsBuilder options)
@@ -49,35 +45,27 @@ namespace Encore.EFCoreTesting
         protected override void OnPreCleanup()
         {
             base.OnPreCleanup();
-            DeleteData();
-        }
-
-        private void DeleteData()
-        {
-            foreach (var context in dbContextResolver.GetAll())
-            {
-                context.Database.EnsureDeleted();
-            }
+            dataAccess?.Dispose();
         }
 
         protected void SetItems<TEntity>(IEnumerable<TEntity> items) where TEntity : class
         {
-            repositoryHelper.SetItems(items.ToSafeArray());
+            dataAccess.SetItems(items.ToSafeArray());
         }
 
         protected void SetItems<TEntity>(params TEntity[] items) where TEntity : class
         {
-            repositoryHelper.SetItems(items);
+            dataAccess.SetItems(items);
         }
 
         protected IEnumerable<TEntity> GetItems<TEntity>(Func<TEntity, bool> where) where TEntity : class
         {
-            return repositoryHelper.GetItems(where);
+            return dataAccess.GetItems(where);
         }
 
         protected TEntity? FirstOrDefault<TEntity>() where TEntity : class
         {
-            return repositoryHelper.FirstOrDefault<TEntity>(v => true);
+            return dataAccess.FirstOrDefault<TEntity>(v => true);
         }
     }
 }

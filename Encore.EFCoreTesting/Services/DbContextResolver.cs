@@ -16,10 +16,10 @@ namespace Encore.EFCoreTesting.Services
             this.Resolver = serviceResolver;
         }
 
-        public void Add(Type contextType)
+        public void Add(Type dbContextType)
         {
-            ValidateType(contextType);
-            DbContexts.Add(contextType);
+            ValidateType(dbContextType);
+            DbContexts.Add(dbContextType);
         }
 
         public IEnumerable<DbContext> GetAll()
@@ -40,46 +40,52 @@ namespace Encore.EFCoreTesting.Services
             if (DbContexts.IsNullOrEmpty())
                 throw new ArgumentException("No DbContexts Registered");
 
-            if (DbContexts.Count == 1)
+            if (DbContexts.OnlyOne())
             {
-                return GetForEntity(DbContexts.FirstOrDefault());
-
-                if (type == null)
-                    throw new ArgumentException("Null Type Issue");
-
-                var context = Resolver.TryResolve(type) as DbContext;
-
-                return context ?? throw new ArgumentException("No DbContexts Registered");
+                // There is only one DbContext registered - so defaults to this one
+                return ResolveDbType(DbContexts.First());
             }
+
+            // Need to determine which dbContext has the TEntity class mapped
+            // NOTE: This might be expensive - Probably should cache the mapping
+
+            var entityType = typeof(TEntity);
+
+            foreach (var dbContextType in DbContexts)
+            {
+                var dbContext = ResolveDbType(dbContextType);
+
+                if (dbContext == null)
+                    continue;
+
+                var match = dbContext.Model.FindEntityType(entityType);
+
+                if (match != null)
+                    return dbContext;
+            }
+
+            // Not mapped - default to first dbContextType
+            return ResolveDbType(DbContexts.First());
         }
 
-        private DbContext GetForEntity(Type? contextType)
+
+        private DbContext ResolveDbType(Type? dbContextType)
         {
-            ValidateType(contextType);
+            if (!ValidateType(dbContextType))
+                throw new ArgumentException("Invalid dbContextType");
 
-            if (DbContexts.IsNullOrEmpty())
-                throw new ArgumentException("No DbContexts Registered");
+            var context = Resolver.TryResolve(dbContextType) as DbContext;
 
-            if (DbContexts.Count == 1)
-            {
-                var type = DbContexts.FirstOrDefault();
-
-                if (type == null)
-                    throw new ArgumentException("Null Type Issue");
-
-                var context = Resolver.TryResolve(type) as DbContext;
-
-                return context ?? throw new ArgumentException("No DbContexts Registered");
-            }
+            return context ?? throw new ArgumentException("No DbContexts Registered");
         }
 
-        private bool ValidateType([NotNullWhen(true)] Type? contextType)
+        private bool ValidateType([NotNullWhen(true)] Type? dbContextType)
         {
-            if (contextType == null)
-                throw new ArgumentNullException(nameof(contextType));
+            if (dbContextType == null)
+                throw new ArgumentNullException(nameof(dbContextType));
 
-            if (contextType.BaseType != typeof(DbContext))
-                throw new ArgumentException($"Type {contextType.Name} is not a valid DbContext");
+            if (dbContextType.BaseType != typeof(DbContext))
+                throw new ArgumentException($"Type {dbContextType.Name} is not a valid DbContext");
 
             return true;
         }

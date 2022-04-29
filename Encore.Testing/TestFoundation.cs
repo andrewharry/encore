@@ -1,5 +1,6 @@
 ﻿using Encore.Testing.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Encore.Testing
 {
@@ -8,11 +9,16 @@ namespace Encore.Testing
         protected bool ValidateOnBuild { get; set; } = false;
         protected bool ValidateScopes { get; set; } = false;
 
-        protected IServiceRegister Registry;
-        protected IServiceResolver Resolver;
+        [NotNull]
+        protected IServiceRegister? Registry { get; set; }
 
+        [NotNull]
+        protected IServiceResolver? Resolver { get; set; }
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private ServiceProvider serviceProvider;
         private ServiceCollection collection;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         protected virtual void SetupRegistry()
         {
@@ -40,9 +46,15 @@ namespace Encore.Testing
         {
             return Resolver.Resolve<T>();
         }
+
         public T? TryResolve<T>() where T : class
         {
             return Resolver.TryResolve<T>();
+        }
+
+        public object? TryResolve(Type type)
+        {
+            return Resolver.TryResolve(type);
         }
 
         public void Dispose()
