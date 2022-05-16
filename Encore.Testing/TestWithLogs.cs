@@ -1,5 +1,7 @@
 ﻿using Encore.Testing.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 
 namespace Encore.Testing
@@ -14,37 +16,9 @@ namespace Encore.Testing
         protected override void OnSetup()
         {
             logger = RegisterMock<ILogger>();
+            Registry.ServiceCollection.TryAdd(ServiceDescriptor.Singleton<ILoggerFactory>(new TestLogFactory(logger)));
+            Registry.ServiceCollection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             base.OnSetup();
-        }
-
-        protected override object? OnRegisterMock(Type type)
-        {
-            if (logger == null)
-                return null;
-
-            if (IsLogger(type))
-            {
-                Registry.RegisterInstance(type, logger);
-                return logger;
-            }
-
-            return null;
-        }
-
-        protected override bool ShouldMock(Type next) => IsLogger(next);
-
-        protected bool IsLogger(Type type)
-        {
-            if (type == null)
-                return false;
-
-            if (type == TypeDependencies.ILoggerType)
-                return true;
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == TypeDependencies.ILoggerGenericType)
-                return true;
-
-            return false;
         }
 
         protected void ClearLogs()
@@ -54,7 +28,7 @@ namespace Encore.Testing
 
         protected void ExpectLogCriticalWithException(int count = 1)
         {
-            logger?.Received(count).Log(LogLevel.Critical, Arg.Any<string>(), Arg.Any<Exception>());
+            logger?.Received(count).Log(LogLevel.Critical, Arg.Any<EventId>(), Arg.Any<string>(), Arg.Any<Exception>());
         }
 
         protected void ExpectLogCritical(int count = 1)
@@ -89,7 +63,7 @@ namespace Encore.Testing
 
         protected void ExpectLogInfo(int count = 1)
         {
-            logger?.Received(count).Log(LogLevel.Information, Arg.Any<string>());
+            logger?.Received(count).Log(Arg.Any<LogLevel>(), Arg.Any<EventId>(), Arg.Any<object>(), Arg.Any<Exception>(), Arg.Any<Func<object, Exception?, string>>());
         }
 
         protected void ExpectLogInfo(string message, int count = 1)

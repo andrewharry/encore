@@ -40,6 +40,8 @@ namespace Encore.Tutorials.TutorialConsole.Services.Tests
 
             Assert.IsNotNull(students);
             Assert.AreEqual(2, students.Length);
+
+            ExpectLogInfo(1);
         }
     }
 }

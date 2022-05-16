@@ -11,9 +11,6 @@ namespace Encore.Testing.Services
     /// </summary>
     public class TypeDependencies
     {
-        internal static readonly Type ILoggerType = typeof(ILogger);
-        internal static readonly Type ILoggerGenericType = typeof(ILogger<>);
-
         public static Type[] IgnoreInterfaces { get; set; } = Array.Empty<Type>();
         public static int CacheSize { get; set; } = 20000;
 
@@ -80,15 +77,10 @@ namespace Encore.Testing.Services
                 .ToSafeArray();
 
             var classes = types.Where(v => v.IsClass && !v.IsInterface);
-            var values = interfaces.Union(classes).Distinct().ToList();
+            var values = interfaces.Union(classes).Distinct().ToSafeArray();
 
-            //Include Loggers
-            values.AddRange(parameters.Where(v => v == ILoggerType || v.IsGenericType && v.GetGenericTypeDefinition() == ILoggerGenericType));
-
-            var final = values.ToSafeArray();
-
-            cache?.Add(type, final);
-            return final;
+            cache?.Add(type, values);
+            return values;
         }
 
         /// <summary>

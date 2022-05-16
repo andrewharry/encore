@@ -9,18 +9,17 @@ namespace Encore.Tutorials.TutorialConsole.Services
     public class StudentQueryService : IStudentQueryService
     {
         private readonly SchoolContext dbContext;
-        //private readonly ILogger<StudentQueryService> logger;
+        private readonly ILogger<StudentQueryService> logger;
 
-        public StudentQueryService(SchoolContext dbContext) //, ILogger<StudentQueryService> logger
+        public StudentQueryService(SchoolContext dbContext, ILogger<StudentQueryService> logger)
         {
             this.dbContext = dbContext;
-            //this.logger = logger;
+            this.logger = logger;
         }
 
         public Task<Student[]> GetAllStudents()
         {
-            //logger.LogInformation($"Calling {nameof(GetAllStudents)} method");
-
+            logger.LogInformation($"Calling {nameof(GetAllStudents)} method");
             return dbContext.Students.ToArrayAsync();
         }
     }
