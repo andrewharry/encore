@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Encore.Testing.Services;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Encore.Testing
@@ -16,20 +17,34 @@ namespace Encore.Testing
             base.OnSetup();
         }
 
-        protected override TInterface RegisterMock<TInterface>() where TInterface : class
+        protected override object? OnRegisterMock(Type type)
         {
-            var type = typeof(TInterface);
+            if (logger == null)
+                return null;
 
-            if (logger != null)
+            if (IsLogger(type))
             {
-                if (type == typeof(ILogger<>))
-                    return (TInterface)logger;
-
-                if (type == typeof(ILogger))
-                    return (TInterface)logger;
+                Registry.RegisterInstance(type, logger);
+                return logger;
             }
 
-            return base.RegisterMock<TInterface>();
+            return null;
+        }
+
+        protected override bool ShouldMock(Type next) => IsLogger(next);
+
+        protected bool IsLogger(Type type)
+        {
+            if (type == null)
+                return false;
+
+            if (type == TypeDependencies.ILoggerType)
+                return true;
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == TypeDependencies.ILoggerGenericType)
+                return true;
+
+            return false;
         }
 
         protected void ClearLogs()

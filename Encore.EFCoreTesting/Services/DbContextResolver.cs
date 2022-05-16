@@ -4,15 +4,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Encore.EFCoreTesting.Services
 {
-    public class DbContextResolver
+    public class DbContextResolver : IDisposable
     {
-        private readonly IServiceResolver Resolver;
+        [NotNull]
+        private IServiceResolver? Resolver;
 
         public HashSet<Type> DbContexts { get; set; }
 
-        public DbContextResolver(IServiceResolver serviceResolver)
+        public DbContextResolver()
         {
             DbContexts = new HashSet<Type>();
+        }
+
+        public void SetupResolver(IServiceResolver serviceResolver)
+        {
             this.Resolver = serviceResolver;
         }
 
@@ -79,7 +84,7 @@ namespace Encore.EFCoreTesting.Services
             return context ?? throw new ArgumentException("No DbContexts Registered");
         }
 
-        private bool ValidateType([NotNullWhen(true)] Type? dbContextType)
+        private static bool ValidateType([NotNull] Type? dbContextType)
         {
             if (dbContextType == null)
                 throw new ArgumentNullException(nameof(dbContextType));
@@ -88,6 +93,16 @@ namespace Encore.EFCoreTesting.Services
                 throw new ArgumentException($"Type {dbContextType.Name} is not a valid DbContext");
 
             return true;
+        }
+
+        public void Dispose()
+        {
+            foreach (var context in GetAll())
+            {
+                context.Database.EnsureDeleted();
+            }
+
+            DbContexts.Clear();
         }
     }
 }

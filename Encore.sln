@@ -13,9 +13,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encore.Tests", "Encore.Tests\Encore.Tests.csproj", "{E3D20DD7-04B1-4BF4-992B-57183A7605E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Encore.Tests", "Encore.Tests\Encore.Tests.csproj", "{E3D20DD7-04B1-4BF4-992B-57183A7605E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encore.EFCoreTesting", "Encore.EFCoreTesting\Encore.EFCoreTesting.csproj", "{36B9EEC5-8985-4817-8742-454F06885A68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Encore.EFCoreTesting", "Encore.EFCoreTesting\Encore.EFCoreTesting.csproj", "{36B9EEC5-8985-4817-8742-454F06885A68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tutorials", "Tutorials", "{9A055708-4FA7-44FE-844C-619A04221384}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encore.Tutorials.TutorialConsole", "Tutorials\Encore.Tutorials.TutorialConsole\Encore.Tutorials.TutorialConsole.csproj", "{844D11F4-DAAF-419C-8A05-C00B2BE7AD95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encore.Tutorials.TutorialConsoleTests", "Tutorials\Encore.Tutorials.TutorialConsoleTests\Encore.Tutorials.TutorialConsoleTests.csproj", "{753CDB88-2EC5-40AB-8115-082A7404FF1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +45,21 @@ Global
 		{36B9EEC5-8985-4817-8742-454F06885A68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36B9EEC5-8985-4817-8742-454F06885A68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36B9EEC5-8985-4817-8742-454F06885A68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{844D11F4-DAAF-419C-8A05-C00B2BE7AD95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{844D11F4-DAAF-419C-8A05-C00B2BE7AD95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{844D11F4-DAAF-419C-8A05-C00B2BE7AD95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{844D11F4-DAAF-419C-8A05-C00B2BE7AD95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{753CDB88-2EC5-40AB-8115-082A7404FF1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{753CDB88-2EC5-40AB-8115-082A7404FF1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{753CDB88-2EC5-40AB-8115-082A7404FF1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{753CDB88-2EC5-40AB-8115-082A7404FF1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{844D11F4-DAAF-419C-8A05-C00B2BE7AD95} = {9A055708-4FA7-44FE-844C-619A04221384}
+		{753CDB88-2EC5-40AB-8115-082A7404FF1C} = {9A055708-4FA7-44FE-844C-619A04221384}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A6A5052-E160-41BD-B815-7FEEE9F0ADFC}

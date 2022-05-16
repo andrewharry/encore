@@ -1,25 +1,18 @@
-﻿using Encore.EFCoreTesting.Services;
-using Encore.Testing.Services;
+﻿using Encore.Testing.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace Encore.EFCoreTesting
+namespace Encore.EFCoreTesting.Services
 {
-    internal class DataAccessHelper : IDisposable
+    internal class DataAccessHelper
     {
         private readonly IServiceResolver dependencyResolver;
         private readonly DbContextResolver dbContextResolver;
 
-        public DataAccessHelper(IServiceResolver dependencyResolver)
+        public DataAccessHelper(IServiceResolver dependencyResolver, DbContextResolver dbContextResolver)
         {
             this.dependencyResolver = dependencyResolver;
-            this.dbContextResolver = new DbContextResolver(dependencyResolver);
+            this.dbContextResolver = dbContextResolver;
         }
-
-        public void CreateDatabase<TDbContext>() where TDbContext : DbContext
-        {
-            dbContextResolver.Add(typeof(DbContext));
-        }
-
 
         public IEnumerable<TEntity> GetItems<TEntity>(Func<TEntity, bool> where) where TEntity : class
         {
@@ -105,17 +98,11 @@ namespace Encore.EFCoreTesting
             {
                 context.Attach(entity);
                 entry.State = EntityState.Modified;
-            }
-        }
-
-        public void Dispose()
-        {
-            foreach (var context in dbContextResolver.GetAll())
-            {
-                context.Database.EnsureDeleted();
+                return;
             }
 
-            dbContextResolver.DbContexts.Clear();
+            entry.State = EntityState.Added;
+            context.Set<TEntity>().Add(entity);
         }
     }
 }

@@ -52,10 +52,26 @@ namespace Encore.Testing
                     continue;
                 }
 
+                if (ShouldMock(next))
+                {
+                    RegisterMock(next);
+                    continue;
+                }
+
                 RegisterByType(next);
             }
 
             RegisterByAttributes(types);
+        }
+
+        protected virtual bool ShouldMock(Type next)
+        {
+            return false;
+        }
+
+        protected virtual object? OnRegisterMock(Type type)
+        {
+            return null;
         }
 
         protected virtual TInterface RegisterMock<TInterface>() where TInterface : class
@@ -64,6 +80,11 @@ namespace Encore.Testing
 
             if (substitutes.ContainsKey(type))
                 return (TInterface)substitutes[type];
+
+            var overrideType = OnRegisterMock(type);
+
+            if (overrideType != null)
+                return (TInterface)overrideType;
 
             var proxy = Substitute.For<TInterface>();
 
@@ -74,6 +95,11 @@ namespace Encore.Testing
 
         protected object? RegisterMock(Type type)
         {
+            var overrideType = OnRegisterMock(type);
+
+            if (overrideType != null)
+                return overrideType;
+
             if (!type.IsInterface)
             {
                 var interfaces = type.GetInterfaces(includeInherited: false);
