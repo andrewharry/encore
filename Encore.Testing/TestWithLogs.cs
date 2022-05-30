@@ -8,14 +8,14 @@ namespace Encore.Testing
 {
     public abstract class TestWithLogs : TestWithRegistry
     {
-        protected ILogger? logger;
+        protected ILoggerInterceptor? logger;
 
         /// <summary>
         /// Override if you want to register a different logger etc
         /// </summary>
         protected override void OnSetup()
         {
-            logger = RegisterMock<ILogger>();
+            logger = RegisterMock<ILoggerInterceptor>();
             Registry.ServiceCollection.TryAdd(ServiceDescriptor.Singleton<ILoggerFactory>(new TestLogFactory(logger)));
             Registry.ServiceCollection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             base.OnSetup();
@@ -28,7 +28,7 @@ namespace Encore.Testing
 
         protected void ExpectLogCriticalWithException(int count = 1)
         {
-            logger?.Received(count).Log(LogLevel.Critical, Arg.Any<EventId>(), Arg.Any<string>(), Arg.Any<Exception>());
+            logger?.Received(count).Log(LogLevel.Critical, Arg.Any<string>(), Arg.Any<Exception>());
         }
 
         protected void ExpectLogCritical(int count = 1)
@@ -63,7 +63,7 @@ namespace Encore.Testing
 
         protected void ExpectLogInfo(int count = 1)
         {
-            logger?.Received(count).Log(Arg.Any<LogLevel>(), Arg.Any<EventId>(), Arg.Any<object>(), Arg.Any<Exception>(), Arg.Any<Func<object, Exception?, string>>());
+            logger?.Received(count).Log(LogLevel.Information, Arg.Any<string>());
         }
 
         protected void ExpectLogInfo(string message, int count = 1)

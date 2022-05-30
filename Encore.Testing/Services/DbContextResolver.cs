@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Encore.EFCoreTesting.Services
+namespace Encore.Testing.Services
 {
     public class DbContextResolver : IDisposable
     {

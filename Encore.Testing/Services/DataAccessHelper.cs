@@ -1,7 +1,7 @@
 ﻿using Encore.Testing.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace Encore.EFCoreTesting.Services
+namespace Encore.Testing.Services
 {
     internal class DataAccessHelper
     {

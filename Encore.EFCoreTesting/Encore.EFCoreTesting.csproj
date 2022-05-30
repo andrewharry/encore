@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Encore.Testing\Encore.Testing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services" />
+  </ItemGroup>
+
 </Project>

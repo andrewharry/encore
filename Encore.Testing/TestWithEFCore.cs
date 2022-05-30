@@ -1,11 +1,11 @@
-﻿using Encore.EFCoreTesting.Services;
+﻿using Encore.Testing.Services;
 using Encore.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Encore.EFCoreTesting
+namespace Encore.Testing
 {
     public abstract class TestWithEFCore : TestWithLogs
     {

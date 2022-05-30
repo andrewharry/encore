@@ -6,9 +6,9 @@ namespace Encore.Testing.Services
     {
         private readonly ILogger logger;
 
-        public TestLogFactory(ILogger logger)
+        public TestLogFactory(ILoggerInterceptor loggerInterceptor)
         {
-            this.logger = logger;
+            this.logger = new TestLogger(loggerInterceptor);
         }
 
         public void AddProvider(ILoggerProvider provider)
