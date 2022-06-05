@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Encore.EFCoreTesting\Encore.EFCoreTesting.csproj" />
     <ProjectReference Include="..\..\Encore.Testing\Encore.Testing.csproj" />
     <ProjectReference Include="..\..\Encore\Encore.csproj" />
     <ProjectReference Include="..\Encore.Tutorials.TutorialConsole\Encore.Tutorials.TutorialConsole.csproj" />

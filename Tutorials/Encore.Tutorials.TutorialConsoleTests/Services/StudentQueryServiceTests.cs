@@ -1,34 +1,17 @@
-﻿using Encore.EFCoreTesting;
+﻿using Encore.Testing;
 using Encore.Tutorials.TutorialConsole.Data;
 using Encore.Tutorials.TutorialConsole.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Encore.Tutorials.TutorialConsole.Services.Tests
 {
     [TestClass]
-    public class StudentQueryServiceTests : TestWithEFCore
+    public class StudentQueryServiceTests : TestWithDependencies<StudentQueryService>
     {
-        [NotNull]
-        private StudentQueryService Sut;
-
         protected override void OnPreRegistration()
         {
-            base.OnPreRegistration();
-            base.CreateDatabase<SchoolContext>();
-        }
-
-        protected override void OnSutRegistration()
-        {
-            Register<StudentQueryService>();
-            base.OnSutRegistration();
-        }
-
-        protected override void OnSutResolve()
-        {
-            base.OnSutResolve();
-            Sut = Resolve<StudentQueryService>();
+            CreateDatabase<SchoolContext>();
         }
 
         [TestMethod]
