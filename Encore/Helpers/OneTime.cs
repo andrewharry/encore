@@ -1,4 +1,6 @@
-﻿namespace Encore.Helpers
+﻿using System;
+
+namespace Encore.Helpers
 {
     internal class OneTime
     {

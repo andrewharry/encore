@@ -1,4 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Encore
 {
@@ -6,11 +9,20 @@ namespace Encore
     {
         public static bool NotNullOrEmpty<T>([NotNullWhen(true)] this T[]? items) => !IsNullOrEmpty(items);
 
+        public static bool NotNullOrEmpty<T>([NotNullWhen(true)] this List<T>? items) => !IsNullOrEmpty(items);
+
         public static bool NotNullOrEmpty<T>([NotNullWhen(true)] this ICollection<T>? items) => !IsNullOrEmpty(items);
+
+        public static bool NotNullOrEmpty<T>([NotNullWhen(true)] this IEnumerable<T>? items) => !IsNullOrEmpty(items);
 
         public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this T[]? items)
         {
             return items == null || items.Length == 0;
+        }
+
+        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this List<T>? items)
+        {
+            return items == null || items.Count == 0;
         }
 
         public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this ICollection<T>? items)
@@ -21,18 +33,6 @@ namespace Encore
         public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T>? items)
         {
             return items == null || !items.Any();
-        }
-
-        [return: NotNull]
-        public static T[] ToSafeArray<T>(this T[]? input)
-        {
-            return input ?? Array.Empty<T>();
-        }
-
-        [return: NotNull]
-        public static T[] ToSafeArray<T>([AllowNull] this T[]? input, Func<T, bool> filter)
-        {
-            return input.ToSafeArray().Where(filter).ToArray();
         }
 
         /// <summary>
@@ -50,6 +50,18 @@ namespace Encore
         public static IEnumerable<T> Safe<T>([AllowNull] this IEnumerable<T>? items)
         {
             return items ?? Array.Empty<T>();
+        }
+
+        [return: NotNull]
+        public static T[] ToSafeArray<T>(this T[]? input)
+        {
+            return input ?? Array.Empty<T>();
+        }
+
+        [return: NotNull]
+        public static T[] ToSafeArray<T>([AllowNull] this T[]? input, Func<T, bool> filter)
+        {
+            return input.ToSafeArray().Where(filter).ToArray();
         }
 
         /// <summary>

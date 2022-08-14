@@ -1,4 +1,6 @@
-﻿namespace Encore.Scope
+﻿using System;
+
+namespace Encore.Scope
 {
     public interface IScopedService : IDisposable
     {

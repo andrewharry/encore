@@ -1,4 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Loader;
 
 namespace Encore.Helpers
@@ -8,26 +12,28 @@ namespace Encore.Helpers
         private static IEnumerable<Assembly> LoadedAssemblies => AssemblyLoadContext.Default.Assemblies;
         private static readonly OneTime OnceOnly = new();
 
-        public static Type[] GetMatchingTypes(Assembly current, Type type)
+        public static Type[] GetTypesByInterface(Type interfaceType)
         {
-            var matches = GetMatchingTypes(type, type.Assembly);
-
-            if (matches.NotNullOrEmpty())
-                return matches;
-
-            var assembles = GetAssemblies(current, current.GetPrefix());
-            return GetMatchingTypes(type, assembles);
+            return GetTypesByInterface(interfaceType, interfaceType.Assembly);
         }
 
-        public static Type[] GetMatchingTypes(Type type, Assembly assembly)
+        public static Type[] GetTypesByInterface(Type interfaceType, Assembly assembly)
         {
-            return GetMatchingTypes(type, new[] { assembly });
+            var types = GetTypes(assembly, assembly.GetPrefix());
+
+            var matches = types
+                .Where(t => t.IsClass && t.GetInterfaces().Contains(interfaceType))
+                .Select(v => v).ToArray();
+
+            return matches.ToSafeArray();
         }
 
-        public static Type[] GetMatchingTypes(Type type, IEnumerable<Assembly> assemblies)
+        public static Type[] GetTypesByBaseClass(Type baseClass, Assembly assembly)
         {
-            var matches = assemblies.SelectMany(t => t.GetTypes())
-                .Where(t => t.IsClass && t.GetInterfaces().Contains(type))
+            var types = GetTypes(assembly, assembly.GetPrefix());
+
+            var matches = types
+                .Where(t => t.IsClass && t.BaseType == baseClass)
                 .Select(v => v).ToArray();
 
             return matches.ToSafeArray();
@@ -52,7 +58,7 @@ namespace Encore.Helpers
         public static IEnumerable<Type> GetTypes(Assembly current, string assemblyPrefix)
         {
             GetAssemblies(current, assemblyPrefix);
-            return Assemblies.IsNullOrEmpty() ? Type.EmptyTypes : Assemblies.SelectMany(v => v.Value.GetTypes());
+            return Assemblies.SelectMany(v => v.Value.GetTypes());
         }
 
         /// <summary>

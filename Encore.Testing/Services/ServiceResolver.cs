@@ -1,44 +1,47 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Encore.Testing.Services
 {
     public class ServiceResolver : IServiceResolver
     {
-        private readonly IServiceProvider container;
+        public IServiceProvider Container { get; }
 
         public ServiceResolver(IServiceProvider container)
         {
-            this.container = container;
+            this.Container = container;
         }
 
         public T Resolve<T>() where T : class
         {
-            return container.GetRequiredService<T>();
+            return Container.GetRequiredService<T>();
         }
 
         public T? TryResolve<T>() where T : class
         {
-            return container.GetService<T>();
+            return Container.GetService<T>();
         }
 
         public object? TryResolve(Type type)
         {
-            return container.GetService(type);
+            return Container.GetService(type);
         }
 
         public object Resolve(Type type)
         {
-            return container.GetRequiredService(type);
+            return Container.GetRequiredService(type);
         }
 
         public IEnumerable<T> ResolveAll<T>() where T : class
         {
-            return container.GetServices<T>().ToSafeArray();
+            return Container.GetServices<T>().ToSafeArray();
         }
 
         public IEnumerable<object> ResolveAll(Type type)
         {
-            return container.GetServices(type).Cast<object>().ToSafeArray();
+            return Container.GetServices(type).Cast<object>().ToSafeArray();
         }
 
         public void Dispose()
