@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Encore.Testing
@@ -17,7 +19,8 @@ namespace Encore.Testing
         /// <summary>
         /// Creates a InMemory Test DbContext.  Needs to be called prior to SetupResolver
         /// </summary>
-        protected virtual void CreateDatabase<TDbContext>() where TDbContext : DbContext
+        /// <param name="lifetime">Lifetime for the DbContext</param>
+        protected virtual void CreateDatabase<TDbContext>(ServiceLifetime lifetime) where TDbContext : DbContext
         {
             if (DataAccess != null)
                 throw new NullReferenceException($"{nameof(CreateDatabase)} needs to be called before {nameof(SetupResolver)}");
@@ -28,16 +31,16 @@ namespace Encore.Testing
             var databaseName = type.Name;
             DbContextResolver.Add(type);
 
-            Registry.Register(type, ServiceLifetime.Transient);
+            Registry.Register(type, lifetime);
             Registry.ServiceCollection.AddDbContextFactory<TDbContext>(option => SetOptions(databaseName, option), ServiceLifetime.Singleton);
-            Registry.ServiceCollection.AddDbContext<TDbContext>(option => SetOptions(databaseName, option), ServiceLifetime.Transient);
+            Registry.ServiceCollection.AddDbContext<TDbContext>(option => SetOptions(databaseName, option), lifetime);
         }
 
         protected override void SetupResolver()
         {
             if (DataAccess == null) { 
                 base.SetupResolver();
-                DbContextResolver.SetupResolver(Resolver);
+                DbContextResolver.SetupResolver(SutAssembly, Resolver);
                 DataAccess = new DataAccessHelper(Resolver, DbContextResolver);
             }
         }

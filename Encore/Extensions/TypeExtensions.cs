@@ -1,4 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Encore
 {
@@ -13,7 +16,7 @@ namespace Encore
         {
             if (includeInherited || type.BaseType == null)
                 return type.GetInterfaces();
-            return type.GetInterfaces().Except(type.BaseType.GetInterfaces());
+            return type.GetInterfaces().Except(type.BaseType.GetInterfaces()).Except(ServiceCollectionExtensions.Excluding);
         }
 
         /// <summary>

@@ -2,7 +2,11 @@
 using Encore.Scope;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
@@ -36,7 +40,9 @@ namespace Encore
             typeof(IEnumerable<>),
             typeof(ICloneable),
             typeof(ISerializable),
-            typeof(IScopedService)
+            typeof(IScopedService),
+            typeof(ILogger),
+            typeof(ILogger<>),
         };
 
         public static void Register(IServiceCollection serviceCollection, List<(Type, RegisterAttribute)> items)
@@ -86,7 +92,6 @@ namespace Encore
 
         public static bool Register(this IServiceCollection serviceCollection, Type @interface, Type type, ServiceLifetime lifetime)
         {
-            serviceCollection.Add(new ServiceDescriptor(type, type, lifetime));
             var count = serviceCollection.Count;
             serviceCollection.Add(new ServiceDescriptor(@interface, type, lifetime));
             return count < serviceCollection.Count;

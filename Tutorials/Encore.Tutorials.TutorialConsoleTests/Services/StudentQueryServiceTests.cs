@@ -3,6 +3,7 @@ using Encore.Tutorials.TutorialConsole.Data;
 using Encore.Tutorials.TutorialConsole.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Encore.Tutorials.TutorialConsole.Services.Tests
 {
@@ -11,7 +12,7 @@ namespace Encore.Tutorials.TutorialConsole.Services.Tests
     {
         protected override void OnPreRegistration()
         {
-            CreateDatabase<SchoolContext>();
+            CreateDatabase<SchoolContext>(ServiceLifetime.Transient);
         }
 
         [TestMethod]

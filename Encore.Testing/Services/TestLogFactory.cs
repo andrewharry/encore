@@ -2,7 +2,7 @@
 
 namespace Encore.Testing.Services
 {
-    internal class TestLogFactory : ILoggerFactory
+    public class TestLogFactory : ILoggerFactory
     {
         private readonly ILogger logger;
 

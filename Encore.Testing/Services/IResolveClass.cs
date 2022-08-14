@@ -1,4 +1,6 @@
-﻿namespace Encore.Testing.Services
+﻿using System;
+
+namespace Encore.Testing.Services
 {
     public interface IResolveClass
     {

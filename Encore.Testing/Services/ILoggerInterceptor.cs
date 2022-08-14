@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System;
 
 public interface ILoggerInterceptor
 {

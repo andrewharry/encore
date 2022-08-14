@@ -1,8 +1,7 @@
 ﻿using Encore.Testing.Services;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using System;
 
 namespace Encore.Testing
 {
@@ -16,8 +15,9 @@ namespace Encore.Testing
         protected override void OnSetup()
         {
             logger = RegisterMock<ILoggerInterceptor>();
-            Registry.ServiceCollection.TryAdd(ServiceDescriptor.Singleton<ILoggerFactory>(new TestLogFactory(logger)));
-            Registry.ServiceCollection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
+            Registry.Register(new TestLogFactory(logger));
+            Registry.Register(typeof(ILogger<>), typeof(TestLoggerT<>));
+            Registry.Register<ILogger>(new TestLogger(logger));
             base.OnSetup();
         }
 
