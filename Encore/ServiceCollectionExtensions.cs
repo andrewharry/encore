@@ -16,7 +16,7 @@ namespace Encore
     {
         public static void RegisterByAttributes(this IServiceCollection collection, Assembly application)
         {
-            var types = AssemblyHelper.SearchByRegisterAttribute<RegisterAttribute>(application);
+            var types = AssemblyHelper.SearchByClassAttribute<RegisterAttribute>(application);
 
             if (types.IsNullOrEmpty())
                 return;
@@ -24,16 +24,20 @@ namespace Encore
             Register(collection, types);
         }
 
-        public static void RegisterByAttributes(this IServiceCollection collection, Type[] types)
+        public static bool RegisterByAttributes(this IServiceCollection collection, params Type[] types)
         {
-            var items = AssemblyHelper.SearchByRegisterAttribute<RegisterAttribute>(types);
+            var items = AssemblyHelper.SearchByClassAttribute<RegisterAttribute>(types);
 
             if (items.IsNullOrEmpty())
-                return;
+                return false;
 
             Register(collection, items);
+            return true;
         }
 
+        /// <summary>
+        /// Exclude these standard interfaces
+        /// </summary>
         public static readonly Type[] Excluding = {
             typeof(IDisposable),
             typeof(IEnumerable),
@@ -60,7 +64,7 @@ namespace Encore
                     continue;
                 }
 
-                var interfaces = type.GetInterfaces(false).Except(Excluding).ToSafeArray();
+                var interfaces = type.GetFilteredInterfaces();
 
                 foreach (var @interface in interfaces)
                 {

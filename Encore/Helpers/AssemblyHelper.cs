@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,45 +8,40 @@ using System.Runtime.Loader;
 
 namespace Encore.Helpers
 {
-    public class AssemblyHelper
+    public static class AssemblyHelper
     {
         private static IEnumerable<Assembly> LoadedAssemblies => AssemblyLoadContext.Default.Assemblies;
         private static readonly OneTime OnceOnly = new();
-
-        public static Type[] GetTypesByInterface(Type interfaceType)
-        {
-            return GetTypesByInterface(interfaceType, interfaceType.Assembly);
-        }
-
+        
+        [return: NotNull]
         public static Type[] GetTypesByInterface(Type interfaceType, Assembly assembly)
         {
             var types = GetTypes(assembly, assembly.GetPrefix());
 
-            var matches = types
+            return types
                 .Where(t => t.IsClass && t.GetInterfaces().Contains(interfaceType))
-                .Select(v => v).ToArray();
-
-            return matches.ToSafeArray();
+                .Select(v => v)
+                .ToSafeArray();
         }
 
+        [return: NotNull]
         public static Type[] GetTypesByBaseClass(Type baseClass, Assembly assembly)
         {
             var types = GetTypes(assembly, assembly.GetPrefix());
 
-            var matches = types
+            return types
                 .Where(t => t.IsClass && t.BaseType == baseClass)
-                .Select(v => v).ToArray();
-
-            return matches.ToSafeArray();
+                .Select(v => v)
+                .ToSafeArray();
         }
 
-        public static List<(Type, T)> SearchByRegisterAttribute<T>(Assembly current)
+        public static List<(Type, T)> SearchByClassAttribute<T>(Assembly current) where T: Attribute
         {
             var types = GetTypes(current, current.GetPrefix());
-            return SearchByRegisterAttribute<T>(types);
+            return SearchByClassAttribute<T>(types);
         }
 
-        public static List<(Type, T)> SearchByRegisterAttribute<T>(IEnumerable<Type> types)
+        public static List<(Type, T)> SearchByClassAttribute<T>(IEnumerable<Type> types) where T : Attribute
         {
             return (from type in types
                     where !type.IsInterface
@@ -53,6 +49,39 @@ namespace Encore.Helpers
                     let attrs = type.GetCustomAttributes(typeof(T), false) as T[]
                     where attrs.NotNullOrEmpty()
                     select (type, attrs.FirstOrDefault())).ToList();
+        }
+
+        public static List<(Type, T[])> SearchByMethodAttribute<T>(Assembly current, BindingFlags flags = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance) where T : Attribute
+        {
+            var types = GetTypes(current, current.GetPrefix());
+            return SearchByMethodAttribute<T>(types, flags);
+        }
+
+        public static List<(Type, T[])> SearchByMethodAttribute<T>(IEnumerable<Type> types, BindingFlags flags) where T : Attribute
+        {
+            var result = new List<(Type, T[])>();
+
+            foreach (var type in types)
+            {
+                if (type.IsInterface || type.IsAbstract)
+                    continue;
+
+                var methods = type.GetMethods(flags);
+
+                if (methods.IsNullOrEmpty())
+                    continue;
+
+#pragma warning disable CS8603 // Possible null reference return.
+                var attrs = methods.SelectMany(v => v.GetCustomAttributes(typeof(T), false) as T[]).ToSafeArray();
+#pragma warning restore CS8603 // Possible null reference return.
+
+                if (attrs.IsNullOrEmpty())
+                    continue;
+
+                result.Add((type, attrs));
+            }
+
+            return result;
         }
 
         public static IEnumerable<Type> GetTypes(Assembly current, string assemblyPrefix)
@@ -101,8 +130,12 @@ namespace Encore.Helpers
                     if (file.Exists)
                         AddAssembly(file, dll, prefix);
                 }
-                catch (FileLoadException) { }
-                catch (BadImageFormatException) { }
+                catch (FileLoadException fileException) {
+                    Console.WriteLine(fileException.Message);
+                }
+                catch (BadImageFormatException badImageException) {
+                    Console.WriteLine(badImageException.Message);
+                }
             }
         }
 

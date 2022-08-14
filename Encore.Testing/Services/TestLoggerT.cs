@@ -18,7 +18,9 @@ namespace Encore.Testing.Services
                 throw new ArgumentNullException(nameof(factory));
             }
 
+#pragma warning disable CS8604 // Possible null reference argument.
             _logger = factory.CreateLogger(typeof(T).FullName);
+#pragma warning restore CS8604 // Possible null reference argument.
         }
 
         /// <inheritdoc />
@@ -34,9 +36,13 @@ namespace Encore.Testing.Services
         }
 
         /// <inheritdoc />
+#pragma warning disable CS8769 // Nullability of reference types in type of parameter doesn't match implemented member (possibly because of nullability attributes).
         void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+#pragma warning restore CS8769 // Nullability of reference types in type of parameter doesn't match implemented member (possibly because of nullability attributes).
         {
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
             _logger.Log(logLevel, eventId, state, exception, formatter);
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
         }
     }
 }

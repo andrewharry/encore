@@ -60,7 +60,7 @@ namespace Encore.Testing.Services
 
         public static object? GetPropertyValue<TEntity>(TEntity entity, IProperty property) where TEntity : class
         {
-            return property.PropertyInfo.GetValue(entity, null);
+            return property?.PropertyInfo?.GetValue(entity, null);
         }
     }
 }

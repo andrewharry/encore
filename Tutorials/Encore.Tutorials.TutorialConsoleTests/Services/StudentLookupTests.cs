@@ -3,12 +3,13 @@ using Encore.Tutorials.TutorialConsole.Data;
 using Encore.Tutorials.TutorialConsole.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using Encore.Tutorials.TutorialConsole.Services.Support;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Encore.Tutorials.TutorialConsole.Services.Tests
 {
     [TestClass]
-    public class StudentLookupTests : TestWithDependencies<StudentLookup>
+    public class StudentQueryServiceTests : TestWithDependencies<StudentQueryService>
     {
         protected override void OnPreRegistration()
         {

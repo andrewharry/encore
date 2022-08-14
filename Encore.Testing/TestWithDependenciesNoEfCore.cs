@@ -11,9 +11,9 @@ using System.Net.Http.Json;
 namespace Encore.Testing
 {
     /// <summary>
-    /// Supports Unit Tests where all of the dependencies are real (not mocked) except for the database (In Memory) and HttpClient
+    /// Supports Unit Tests where all of the dependencies are real - no database
     /// </summary>
-    public abstract class TestWithDependencies<T> : TestWithEfCore where T : class
+    public abstract class TestWithDependenciesNoEfCore<T> : TestWithLogs where T : class
     {
         /// <summary>
         /// Gets an instance of the System Under Test (the class being tested)

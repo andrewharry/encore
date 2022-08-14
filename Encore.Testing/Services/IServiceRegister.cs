@@ -30,5 +30,7 @@ namespace Encore.Testing.Services
         void TryRegister(Type type, ServiceLifetime lifetime = ServiceLifetime.Transient);
 
         void TryRegister(Type @interface, Type type, ServiceLifetime lifetime = ServiceLifetime.Transient);
+
+        bool RegisterByAttributes(Type type);
     }
 }

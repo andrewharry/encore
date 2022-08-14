@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="[6.0,7.0]" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[6.0,7.0]" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[6.0,7.0]" />
+    <PackageReference Include="Newtonsoft.Json" Version="[13.0.1,)" />
   </ItemGroup>
 
 </Project>

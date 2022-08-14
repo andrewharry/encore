@@ -10,13 +10,14 @@ namespace Encore
         /// <summary>
         /// Returns all of the Interfaces implemented by the type.
         /// </summary>
-        /// <param name="includeInherited">Option to exclude the Base Type interfaces</param>
         [return: NotNull]
-        public static IEnumerable<Type> GetInterfaces(this Type type, bool includeInherited)
+        public static Type[] GetFilteredInterfaces(this Type type)
         {
-            if (includeInherited || type.BaseType == null)
-                return type.GetInterfaces();
-            return type.GetInterfaces().Except(type.BaseType.GetInterfaces()).Except(ServiceCollectionExtensions.Excluding);
+            return type
+                .GetInterfaces()
+                .Safe()
+                .Except(ServiceCollectionExtensions.Excluding)
+                .ToSafeArray();
         }
 
         /// <summary>
