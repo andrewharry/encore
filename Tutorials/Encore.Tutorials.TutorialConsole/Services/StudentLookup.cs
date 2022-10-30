@@ -6,21 +6,21 @@ using Microsoft.Extensions.Logging;
 namespace Encore.Tutorials.TutorialConsole.Services
 {
     [Transient]
-    public class StudentQueryService : IStudentQueryService
+    public class StudentLookup : IStudentLookup
     {
         private readonly SchoolContext dbContext;
-        private readonly ILogger<StudentQueryService> logger;
+        private readonly ILogger<StudentLookup> logger;
 
-        public StudentQueryService(SchoolContext dbContext, ILogger<StudentQueryService> logger)
+        public StudentLookup(SchoolContext dbContext, ILogger<StudentLookup> logger)
         {
             this.dbContext = dbContext;
             this.logger = logger;
         }
 
-        public Task<Student[]> GetAllStudents()
+        public async Task<Student[]> GetAllStudents()
         {
             logger.LogInformation($"Calling {nameof(GetAllStudents)} method");
-            return dbContext.Students.ToArrayAsync();
+            return (await dbContext.Students.ToArrayAsync()).ToSafeArray();
         }
     }
 }

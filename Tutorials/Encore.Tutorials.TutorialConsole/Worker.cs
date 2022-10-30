@@ -3,16 +3,16 @@ using Microsoft.Extensions.Hosting;
 
 public class Worker : IHostedService
 {
-    private readonly IStudentQueryService studentQueries;
+    private readonly IStudentLookup studentLookup;
 
-    public Worker(IStudentQueryService studentQueries)
+    public Worker(IStudentLookup studentLookup)
     {
-        this.studentQueries = studentQueries;
+        this.studentLookup = studentLookup;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var students = await studentQueries.GetAllStudents();
+        var students = await studentLookup.GetAllStudents();
 
         if (students == null)
         {

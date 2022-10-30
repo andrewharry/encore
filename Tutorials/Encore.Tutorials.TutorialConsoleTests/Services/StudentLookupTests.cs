@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Encore.Tutorials.TutorialConsole.Services.Tests
 {
     [TestClass]
-    public class StudentQueryServiceTests : TestWithDependencies<StudentQueryService>
+    public class StudentLookupTests : TestWithDependencies<StudentLookup>
     {
         protected override void OnPreRegistration()
         {

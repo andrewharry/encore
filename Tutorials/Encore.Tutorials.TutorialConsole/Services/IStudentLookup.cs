@@ -2,7 +2,7 @@
 
 namespace Encore.Tutorials.TutorialConsole.Services
 {
-    public interface IStudentQueryService
+    public interface IStudentLookup
     {
         Task<Student[]> GetAllStudents();
     }
