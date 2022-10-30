@@ -1,6 +1,11 @@
 ﻿using Encore.Testing.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Encore.Testing
 {
@@ -19,19 +24,18 @@ namespace Encore.Testing
         /// <summary>
         /// Register class and interface with container
         /// </summary>
-        public new void Register<TInterface, TClass>(ServiceLifetime lifetime = ServiceLifetime.Transient) where TInterface : class where TClass : TInterface
+        public void RegisterWithDependencies<TInterface, TClass>(ServiceLifetime lifetime = ServiceLifetime.Transient) where TInterface : class where TClass : TInterface
         {
             RegisterByType(typeof(TClass));
-            Registry.Register<TInterface, TClass>(lifetime);
+            Registry.TryRegister<TInterface, TClass>(lifetime);
         }
 
         /// <summary>
         /// Register class with container
         /// </summary>
-        protected void Register<TClass>(ServiceLifetime lifetime = ServiceLifetime.Transient) where TClass : class
+        protected void RegisterWithDependencies<TClass>(ServiceLifetime lifetime = ServiceLifetime.Transient) where TClass : class
         {
             RegisterByType(typeof(TClass));
-            Registry.Register<TClass>(lifetime);
         }
 
         protected void RegisterByType(Type type)
@@ -39,23 +43,19 @@ namespace Encore.Testing
             if (Registry.IsRegistered(type))
                 return;
 
-            var types = TypeDependencies.GetDependencies(type);
+            var types = TypeDependencies.GetDependencies(SutAssembly, type);
 
             foreach (var next in types)
             {
                 if (Registry.IsRegistered(next))
                     continue;
 
-                if (next.BaseType != null)
-                {
-                    RegisterMock(next);
-                    continue;
-                }
-
                 RegisterByType(next);
             }
 
-            RegisterByAttributes(types);
+            var interfaces = type.GetInterfaces(includeInherited: false);
+            interfaces.Each(v => Registry.TryRegister(v, type));
+            Registry.TryRegister(type);
         }
 
         protected virtual TInterface RegisterMock<TInterface>() where TInterface : class
@@ -74,7 +74,7 @@ namespace Encore.Testing
 
         protected object? RegisterMock(Type type)
         {
-            if (!type.IsInterface)
+            if (type.IsClass)
             {
                 var interfaces = type.GetInterfaces(includeInherited: false);
                 interfaces.Each(v => RegisterMock(v));
@@ -84,17 +84,35 @@ namespace Encore.Testing
             if (substitutes.ContainsKey(type))
                 return substitutes[type];
 
-            var proxy = Substitute.For(new[] { type }, null);
+            if (type.FullName == null && type.Implements(typeof(ILogger)))
+                return substitutes[typeof(ILogger)];
+
+            var proxy = CreateSubstitute(type);
 
             Registry.RegisterInstance(type, proxy);
             substitutes.Add(type, proxy);
             return proxy;
         }
 
+        private static readonly MethodInfo? SubstituteForType = typeof(InvokeNSubstitute).GetMethod(nameof(InvokeNSubstitute.For));
+
+        protected object? CreateSubstitute(Type type)
+        {
+            return SubstituteForType?.MakeGenericMethod(type).Invoke(new InvokeNSubstitute(), null);
+        }
+
         protected override void OnPostCleanup()
         {
             substitutes.Clear();
             base.OnPostCleanup();
+        }
+    }
+
+    internal class InvokeNSubstitute
+    {
+        public object? For<T>() where T : class
+        {
+            return Substitute.For<T>();
         }
     }
 }

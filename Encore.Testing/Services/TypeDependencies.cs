@@ -2,6 +2,9 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Encore.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TypeDictionary = System.Collections.Generic.Dictionary<System.Type, System.Type[]>;
 
 namespace Encore.Testing.Services
@@ -11,7 +14,7 @@ namespace Encore.Testing.Services
     /// </summary>
     public class TypeDependencies
     {
-        public static Type[] IgnoreInterfaces { get; set; } = Array.Empty<Type>();
+        public static Type[] IgnoreInterfaces { get; set; } = ServiceCollectionExtensions.Excluding;
         public static int CacheSize { get; set; } = 20000;
 
         private static TypeDictionary classCache = new TypeDictionary(CacheSize);
@@ -20,17 +23,17 @@ namespace Encore.Testing.Services
         private static readonly Type genericArray = typeof(IEnumerable<>);
         private static Type[] empty = Array.Empty<Type>();
 
-        public static Type[] GetDependencies(Type type, bool includeDependenciesByAttribute = true)
+        public static Type[] GetDependencies(Assembly assembly, Type type, bool includeDependenciesByAttribute = true)
         {
-            return GetTypesInternal(type, classCache, interfacesOnly: false, includeDependenciesByAttribute);
+            return GetTypesInternal(assembly, type, classCache, interfacesOnly: false, includeDependenciesByAttribute);
         }
 
-        public static Type[] GetInterfaces(Type type)
+        public static Type[] GetDependenciesByInterfaces(Assembly assembly, Type type)
         {
-            return GetTypesInternal(type, interfaceCache, interfacesOnly: true, includeDependenciesByAttribute: false);
+            return GetTypesInternal(assembly, type, interfaceCache, interfacesOnly: true, includeDependenciesByAttribute: false);
         }
 
-        private static Type[] GetTypesInternal(Type type, TypeDictionary cache, bool interfacesOnly, bool includeDependenciesByAttribute)
+        private static Type[] GetTypesInternal(Assembly assembly, Type type, TypeDictionary cache, bool interfacesOnly, bool includeDependenciesByAttribute)
         {
             if (type == null)
                 return empty;
@@ -56,7 +59,7 @@ namespace Encore.Testing.Services
             var parameters = constructor.GetParameters().ToSafeArray(v => v.ParameterType);
             var types = new List<Type>(parameters.Length);
 
-            types.AddRange(parameters.Where(v => !v.IsGenericType));
+            types.AddRange(parameters);
             types.AddRange(parameters.Where(v => v.IsGenericType && v.GetGenericTypeDefinition() == genericArray).Select(v => v.GetGenericArguments()[0]));
 
             var interfaces = types.Where(v => v.IsInterface)
@@ -73,7 +76,7 @@ namespace Encore.Testing.Services
                 types.AddRange(GetDependenciesByAttribute(type));
 
             interfaces = interfaces
-                .SelectMany(v => AssemblyHelper.GetMatchingTypes(Assembly.GetEntryAssembly() ?? Assembly.GetCallingAssembly(), v))
+                .SelectMany(v => AssemblyHelper.GetTypesByInterface(v, assembly))
                 .ToSafeArray();
 
             var classes = types.Where(v => v.IsClass && !v.IsInterface);

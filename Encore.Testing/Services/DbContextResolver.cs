@@ -1,6 +1,11 @@
-﻿using Encore.Testing.Services;
+﻿using Encore.Helpers;
+using Encore.Testing.Services;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reflection;
 
 namespace Encore.Testing.Services
 {
@@ -16,9 +21,19 @@ namespace Encore.Testing.Services
             DbContexts = new HashSet<Type>();
         }
 
-        public void SetupResolver(IServiceResolver serviceResolver)
+        public void SetupResolver(Assembly assembly, IServiceResolver serviceResolver, bool autoPopulate = false)
         {
             this.Resolver = serviceResolver;
+
+            if (autoPopulate)
+            {
+                var dbContexts = AssemblyHelper.GetTypesByBaseClass(typeof(DbContext), assembly);
+
+                foreach (Type dbContext in dbContexts)
+                {
+                    Add(dbContext);
+                }
+            }
         }
 
         public void Add(Type dbContextType)
@@ -26,7 +41,7 @@ namespace Encore.Testing.Services
             ValidateType(dbContextType);
             DbContexts.Add(dbContextType);
         }
-
+        
         public IEnumerable<DbContext> GetAll()
         {
             foreach (var contextType in DbContexts)
@@ -99,7 +114,10 @@ namespace Encore.Testing.Services
         {
             foreach (var context in GetAll())
             {
-                context.Database.EnsureDeleted();
+                if (context.Database.IsInMemory())
+                {
+                    context.Database.EnsureDeleted();
+                }
             }
 
             DbContexts.Clear();

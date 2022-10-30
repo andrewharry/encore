@@ -1,11 +1,15 @@
 ﻿using Encore.Testing.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace Encore.Testing
 {
     public abstract class TestFoundation : IRegisterClass, IResolveClass
     {
+        protected Assembly? SutAssembly { get; set; } = Assembly.GetCallingAssembly();
+
         protected bool ValidateOnBuild { get; set; } = false;
         protected bool ValidateScopes { get; set; } = false;
 

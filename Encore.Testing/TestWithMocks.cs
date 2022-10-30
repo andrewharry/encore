@@ -1,5 +1,6 @@
 ﻿using Encore.Testing.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Encore.Testing
@@ -42,7 +43,7 @@ namespace Encore.Testing
             if (Registry.IsRegistered(type))
                 return;
 
-            var types = TypeDependencies.GetInterfaces(type);
+            var types = TypeDependencies.GetDependenciesByInterfaces(SutAssembly, type);
 
             if (types.IsNullOrEmpty())
                 return;
