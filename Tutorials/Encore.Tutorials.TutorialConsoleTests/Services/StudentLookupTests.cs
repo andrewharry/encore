@@ -1,15 +1,14 @@
-﻿using Encore.Testing;
+﻿using System.Threading.Tasks;
+using Encore.Testing;
 using Encore.Tutorials.TutorialConsole.Data;
 using Encore.Tutorials.TutorialConsole.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
-using Encore.Tutorials.TutorialConsole.Services.Support;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Encore.Tutorials.TutorialConsole.Services.Tests
 {
     [TestClass]
-    public class StudentQueryServiceTests : TestWithDependencies<StudentQueryService>
+    public class StudentLookupTests : TestWithDependencies<StudentLookup>
     {
         protected override void OnPreRegistration()
         {

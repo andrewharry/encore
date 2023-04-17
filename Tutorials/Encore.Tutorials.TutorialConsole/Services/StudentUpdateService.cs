@@ -5,11 +5,11 @@ namespace Encore.Tutorials.TutorialConsole.Services;
 
 public class StudentUpdateService
 {
-    private readonly IStudentQueryService lookup;
+    private readonly IStudentLookup lookup;
     private readonly IStudentRepository update;
     private readonly ILogger<StudentUpdateService> logger;
 
-    public StudentUpdateService(IStudentQueryService lookup, IStudentRepository update, ILogger<StudentUpdateService> logger)
+    public StudentUpdateService(IStudentLookup lookup, IStudentRepository update, ILogger<StudentUpdateService> logger)
     {
         this.lookup = lookup;
         this.update = update;
