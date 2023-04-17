@@ -22,5 +22,11 @@ namespace Encore.Tutorials.TutorialConsole.Services
             logger.LogInformation($"Calling {nameof(GetAllStudents)} method");
             return (await dbContext.Students.ToArrayAsync()).ToSafeArray();
         }
+
+        public Task<Student?> GetStudent(int id)
+        {
+            logger.LogInformation($"Calling {nameof(GetStudent)} method with Id:{id}");
+            return dbContext.Students.FirstOrDefaultAsync(v => v.StudentId == id);
+        }
     }
 }

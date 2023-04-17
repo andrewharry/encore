@@ -9,6 +9,8 @@ namespace Encore.Testing
     {
         protected ILoggerInterceptor? logger;
 
+        public ILogger? Logger { get; private set; }
+
         /// <summary>
         /// Override if you want to register a different logger etc
         /// </summary>
@@ -17,7 +19,9 @@ namespace Encore.Testing
             logger = RegisterMock<ILoggerInterceptor>();
             Registry.Register(new TestLogFactory(logger));
             Registry.Register(typeof(ILogger<>), typeof(TestLoggerT<>));
-            Registry.Register<ILogger>(new TestLogger(logger));
+            Logger = new TestLogger(logger);
+            Registry.Register<ILogger>(Logger);
+            substitutes.Add(typeof(ILogger), Logger);
             base.OnSetup();
         }
 
@@ -66,7 +70,12 @@ namespace Encore.Testing
             logger?.Received(count).Log(LogLevel.Information, Arg.Any<string>());
         }
 
-        protected void ExpectLogInfo(string message, int count = 1)
+        protected void ExpectLogInfo(string message)
+        {
+            logger?.Received().Log(LogLevel.Information, message);
+        }
+
+        protected void ExpectLogInfo(string message, int count)
         {
             logger?.Received(count).Log(LogLevel.Information, message);
         }

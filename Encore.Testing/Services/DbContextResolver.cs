@@ -9,6 +9,7 @@ using System.Reflection;
 
 namespace Encore.Testing.Services
 {
+    [SuppressMessage("Major Code Smell", "S3881:\"IDisposable\" should be implemented correctly", Justification = "<Pending>")]
     public class DbContextResolver : IDisposable
     {
         [NotNull]
@@ -16,7 +17,9 @@ namespace Encore.Testing.Services
 
         public HashSet<Type> DbContexts { get; set; }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public DbContextResolver()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             DbContexts = new HashSet<Type>();
         }
@@ -46,9 +49,7 @@ namespace Encore.Testing.Services
         {
             foreach (var contextType in DbContexts)
             {
-                var context = Resolver.TryResolve(contextType) as DbContext;
-
-                if (context == null)
+                if (Resolver.TryResolve(contextType) is not DbContext context)
                     continue;
 
                 yield return context;
@@ -110,6 +111,7 @@ namespace Encore.Testing.Services
             return true;
         }
 
+        [SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize", Justification = "<Pending>")]
         public void Dispose()
         {
             foreach (var context in GetAll())

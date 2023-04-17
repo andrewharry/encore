@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 
 namespace Encore.Testing
 {
@@ -19,13 +20,12 @@ namespace Encore.Testing
         /// <summary>
         /// Creates a InMemory Test DbContext.  Needs to be called prior to SetupResolver
         /// </summary>
-        /// <param name="lifetime">Lifetime for the DbContext</param>
         protected virtual void CreateDatabase<TDbContext>(ServiceLifetime lifetime) where TDbContext : DbContext
         {
             if (DataAccess != null)
                 throw new NullReferenceException($"{nameof(CreateDatabase)} needs to be called before {nameof(SetupResolver)}");
 
-            DbContextResolver = DbContextResolver ?? new DbContextResolver();
+            DbContextResolver ??= new DbContextResolver();
 
             var type = typeof(TDbContext);
             var databaseName = type.Name;
@@ -40,7 +40,9 @@ namespace Encore.Testing
         {
             if (DataAccess == null) { 
                 base.SetupResolver();
+#pragma warning disable CS8604 // Possible null reference argument.
                 DbContextResolver.SetupResolver(SutAssembly, Resolver);
+#pragma warning restore CS8604 // Possible null reference argument.
                 DataAccess = new DataAccessHelper(Resolver, DbContextResolver);
             }
         }
@@ -59,6 +61,11 @@ namespace Encore.Testing
             DbContextResolver?.Dispose();
         }
 
+        protected Option<TEntity> SetItem<TEntity>(TEntity item) where TEntity : class
+        {
+            return DataAccess.SetItem(item);
+        }
+
         protected void SetItems<TEntity>(IEnumerable<TEntity> items) where TEntity : class
         {
             DataAccess.SetItems(items.ToSafeArray());
@@ -69,7 +76,7 @@ namespace Encore.Testing
             DataAccess.SetItems(items);
         }
 
-        protected IEnumerable<TEntity> GetItems<TEntity>(Func<TEntity, bool> where) where TEntity : class
+        protected IEnumerable<TEntity> GetItems<TEntity>(Expression<Func<TEntity, bool>> where) where TEntity : class
         {
             return DataAccess.GetItems(where);
         }

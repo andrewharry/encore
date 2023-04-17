@@ -1,5 +1,6 @@
-﻿using Encore.Testing.Services;
+﻿using Encore.Types;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,7 +19,9 @@ namespace Encore.Testing
 
         protected override void OnSutRegistration()
         {
-            RegisterWithSubstitutes(typeof(T));
+            var type = typeof(T);
+            SutAssembly = type.Assembly;
+            RegisterWithSubstitutes(type);
             Registry.Register<T>(ServiceLifetime.Transient);
         }
 
@@ -43,13 +46,16 @@ namespace Encore.Testing
             if (Registry.IsRegistered(type))
                 return;
 
-            var types = TypeDependencies.GetDependenciesByInterfaces(SutAssembly, type);
+            var types = TypeDependencies.GetTypes(type, interfacesOnly:true);
 
             if (types.IsNullOrEmpty())
                 return;
 
             foreach (var next in types)
             {
+                if (next.Implements(typeof(ILogger)))
+                    continue;
+
                 if (Registry.IsRegistered(next))
                     continue;
 

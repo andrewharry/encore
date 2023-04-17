@@ -2,6 +2,9 @@
 
 namespace Encore.Helpers
 {
+    /// <summary>
+    /// A helper class that ensures that a given action is executed only once in a thread-safe manner.
+    /// </summary>
     internal class OneTime
     {
         private readonly object locker = new object();

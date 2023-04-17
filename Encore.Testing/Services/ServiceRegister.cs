@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Encore.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Encore.Testing.Services
@@ -83,6 +84,11 @@ namespace Encore.Testing.Services
         public void TryRegister(Type @interface, Type type, ServiceLifetime lifetime = ServiceLifetime.Transient)
         {
             ServiceCollection.TryRegister(@interface, type, lifetime);
+        }
+
+        public bool RegisterByAttributes(Type type)
+        {
+            return ServiceCollection.RegisterByAttributes(type);
         }
     }
 }

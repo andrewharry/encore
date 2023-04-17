@@ -1,6 +1,7 @@
 ﻿using Encore.Testing.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -8,7 +9,7 @@ namespace Encore.Testing
 {
     public abstract class TestFoundation : IRegisterClass, IResolveClass
     {
-        protected Assembly? SutAssembly { get; set; } = Assembly.GetCallingAssembly();
+        protected Assembly SutAssembly { get; set; } = Assembly.GetCallingAssembly();
 
         protected bool ValidateOnBuild { get; set; } = false;
         protected bool ValidateScopes { get; set; } = false;
@@ -59,6 +60,19 @@ namespace Encore.Testing
         public object? TryResolve(Type type)
         {
             return Resolver.TryResolve(type);
+        }
+
+        protected static void InfiniteLoop()
+        {
+            #if DEBUG
+            var stack = new StackTrace().GetFrames();
+
+            if (stack.Length > 100)
+            {
+                Console.WriteLine("Potential Infinite Loop - Stackoverflow imminent");
+                Debugger.Break();
+            }
+            #endif
         }
 
         public void Dispose()

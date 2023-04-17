@@ -1,9 +1,9 @@
-﻿using Encore.Testing;
+﻿using System.Threading.Tasks;
+using Encore.Testing;
 using Encore.Tutorials.TutorialConsole.Data;
 using Encore.Tutorials.TutorialConsole.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Encore.Tutorials.TutorialConsole.Services.Tests
 {

@@ -1,6 +1,6 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Encore.Testing.Services;
+using Encore.Testing.Helpers;
 using Encore.Tests.TestClasses;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Encore.Tests
 {
@@ -10,7 +10,7 @@ namespace Encore.Tests
         [TestMethod]
         public void Should_opt_for_the_ideal_constructor()
         {
-            var constructor = TypeDependencies.GetConstructor(typeof(ConstructorTestClass));
+            var constructor = ConstructorLookup.Get(typeof(ConstructorTestClass));
 
             Assert.IsNotNull(constructor);
 

@@ -1,17 +1,15 @@
 ﻿using Encore.Testing.Services;
-using Microsoft.Extensions.DependencyInjection;
+using Encore.Types;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Encore.Testing
 {
-    public abstract class TestWithRegistry : TestWithHooks, IDisposable
+    public abstract class TestWithRegistry : TestWithHooks
     {
-        protected readonly Dictionary<Type, object> substitutes = new Dictionary<Type, object>(1000);
+        protected readonly Dictionary<Type, object> substitutes = new (1000);
 
         /// <summary>
         /// Register class instance with container
@@ -22,18 +20,9 @@ namespace Encore.Testing
         }
 
         /// <summary>
-        /// Register class and interface with container
-        /// </summary>
-        public void RegisterWithDependencies<TInterface, TClass>(ServiceLifetime lifetime = ServiceLifetime.Transient) where TInterface : class where TClass : TInterface
-        {
-            RegisterByType(typeof(TClass));
-            Registry.TryRegister<TInterface, TClass>(lifetime);
-        }
-
-        /// <summary>
         /// Register class with container
         /// </summary>
-        protected void RegisterWithDependencies<TClass>(ServiceLifetime lifetime = ServiceLifetime.Transient) where TClass : class
+        protected void RegisterWithDependencies<TClass>() where TClass : class
         {
             RegisterByType(typeof(TClass));
         }
@@ -43,17 +32,25 @@ namespace Encore.Testing
             if (Registry.IsRegistered(type))
                 return;
 
-            var types = TypeDependencies.GetDependencies(SutAssembly, type);
+            InfiniteLoop();
+
+            var types = TypeDependencies.GetDependencies(SutAssembly, type, interfacesOnly:false);
 
             foreach (var next in types)
             {
-                if (Registry.IsRegistered(next))
+                if (substitutes.ContainsKey(next.Dependency))
                     continue;
 
-                RegisterByType(next);
+                if (UseLoggerSubstitute(next.Dependency))
+                    continue;
+
+                next.DerivedTypes.Each(RegisterByType);
             }
 
-            var interfaces = type.GetInterfaces(includeInherited: false);
+            if (Registry.RegisterByAttributes(type))
+                return;
+            
+            var interfaces = type.GetFilteredInterfaces();
             interfaces.Each(v => Registry.TryRegister(v, type));
             Registry.TryRegister(type);
         }
@@ -76,7 +73,7 @@ namespace Encore.Testing
         {
             if (type.IsClass)
             {
-                var interfaces = type.GetInterfaces(includeInherited: false);
+                var interfaces = type.GetFilteredInterfaces();
                 interfaces.Each(v => RegisterMock(v));
                 return null;
             }
@@ -84,35 +81,22 @@ namespace Encore.Testing
             if (substitutes.ContainsKey(type))
                 return substitutes[type];
 
-            if (type.FullName == null && type.Implements(typeof(ILogger)))
+            if (UseLoggerSubstitute(type))
                 return substitutes[typeof(ILogger)];
 
-            var proxy = CreateSubstitute(type);
+            var proxy = SubstituteHelper.ForType(type);
 
             Registry.RegisterInstance(type, proxy);
             substitutes.Add(type, proxy);
             return proxy;
         }
 
-        private static readonly MethodInfo? SubstituteForType = typeof(InvokeNSubstitute).GetMethod(nameof(InvokeNSubstitute.For));
-
-        protected object? CreateSubstitute(Type type)
-        {
-            return SubstituteForType?.MakeGenericMethod(type).Invoke(new InvokeNSubstitute(), null);
-        }
-
+        private bool UseLoggerSubstitute(Type type) => type.Implements(typeof(ILogger)) && substitutes.ContainsKey(typeof(ILogger));
+        
         protected override void OnPostCleanup()
         {
             substitutes.Clear();
             base.OnPostCleanup();
-        }
-    }
-
-    internal class InvokeNSubstitute
-    {
-        public object? For<T>() where T : class
-        {
-            return Substitute.For<T>();
         }
     }
 }
